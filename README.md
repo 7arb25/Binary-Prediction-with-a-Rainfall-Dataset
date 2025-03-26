@@ -1,19 +1,17 @@
 # Binary-Prediction-with-a-Rainfall-Dataset
 
 ---
-![imge here]()
+![imge here](https://github.com/7arb25/Binary-Prediction-with-a-Rainfall-Dataset/blob/d85aae4a9e62ebd91b1aa6dc528d5971c7024325/imgs/istockphoto-1476190237-612x612.jpg)
 ---
 
-My Full Answer For Kaggle's PlayGround Comptiition 
+My Full Answer For Kaggle's [Competition](https://www.kaggle.com/competitions/playground-series-s5e3) opened at march 2025 , you can complete by [Open In VsCode](https://vscode.dev/github/7arb25/Binary-Prediction-with-a-Rainfall-Dataset) after reading the .md file below.
 
-[![Open in VS Code](images/vscode.png)](https://vscode.dev/github/7arb25/Binary-Prediction-with-a-Rainfall-Dataset)
 ---
 
 **Table of Contents**
 
 - [Project Overview](#project-overview)
 - [Dataset Feature Descriptions](#dataset-feature-descriptions)
-- [Tools](#tools)
 - [EDA](#eda)
 - [Data Modeling](#data-modeling)
 - [Model Limitations](#model-limitations)
@@ -25,6 +23,7 @@ My Full Answer For Kaggle's PlayGround Comptiition
 
 ## Project Overview
 
+```
 ─── data/
 |   |── plain/
 │            ├── train.csv
@@ -51,12 +50,18 @@ My Full Answer For Kaggle's PlayGround Comptiition
 │   ├── sgd_classifier.ipynb
 │   ├── logistic_reg.ipynb
 │   └── sgd_classifier.ipynb
+├── report/
+│   ├── EDA_report.pdf
+│   ├── Modeling_report.pdf
+│   ├── representation
+├── dashboards/
+│   ├── 
+│   ├── 
 ├── README.md
 ─── requirements.txt
+```
 
-
-[![License](https://img.shields.io/badge/license-[YourLicense]-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-[VersionNumber]-green.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-[1.0.0]-green.svg)](CHANGELOG.md)
 
 ---
 
@@ -79,6 +84,34 @@ My Full Answer For Kaggle's PlayGround Comptiition
 | `rainfall`     | Binary target variable: 1 indicates rainfall, 0 indicates no rainfall.     | Integer (Binary) |
 
 ---
+### feature engineered columns
+
+``` python
+features_to_transform = ['dewpoint', 'humidity', 'cloud', 'sunshine']
+transformer = PowerTransformer(method='yeo-johnson')
+def transform_features(df, features_to_transform, transformer):
+    df[features_to_transform] = transformer.fit_transform(df[features_to_transform])
+    return df
+```
+
+``` python
+def generate_new_features(df):
+    df['temp_range'] = df['maxtemp'] - df['mintemp']
+    df['sin_wind'] = np.sin(np.radians(df['winddirection']))
+    df['cos_wind'] = np.cos(np.radians(df['winddirection']))
+    return df
+```
+
+``` python
+def generate_rolling_features(df):
+    df['temp_7day_avg'] = df['temparature'].rolling(window=7, min_periods=1).mean()
+    df['temp_30day_avg'] = df['temparature'].rolling(window=30, min_periods=1).mean()
+    df['temp_90day_avg'] = df['temparature'].rolling(window=90, min_periods=1).mean()
+   
+    return df
+```
+
+---
 
 ## EDA
 
@@ -98,7 +131,7 @@ This section provides insights into the distribution of numerical features in th
 
 **Histograms:**
 
-[Histigram image here]
+![Histigram image here](https://github.com/7arb25/Binary-Prediction-with-a-Rainfall-Dataset/blob/d85aae4a9e62ebd91b1aa6dc528d5971c7024325/imgs/hist.png)
 
 **Observations:**
 
@@ -126,9 +159,28 @@ This section provides insights into the distribution of numerical features in th
 ### Interpretation of Meteorological Data Graphs
 
 
-[image here]()
+![image here](https://github.com/7arb25/Binary-Prediction-with-a-Rainfall-Dataset/blob/d85aae4a9e62ebd91b1aa6dc528d5971c7024325/imgs/Day%20Fluctuations.png)
 
 The provided image contains a series of six line graphs and three scatter plots, comparing various meteorological variables against the day of the year (ranging from 0 to 350, likely representing a year). The variables analyzed include pressure, maximum temperature, temperature, minimum temperature, dew point, humidity, cloud cover, sunshine, wind speed, and wind direction. Each graph compares these variables under two conditions: with rainfall (orange line, labeled "rainfall = 1") and without rainfall (blue line, labeled "rainfall = 0").
+
+``` python
+features = train.drop(columns=['id', 'day', 'rainfall']).columns
+flen=len(features)
+fig, axes = plt.subplots(flen//3+1, 3, figsize=(16, flen//3*5)) # 3 columns per row
+axes = axes.flatten()
+for i , features in enumerate(features):
+    sns.lineplot(x='day', y=features,hue='rainfall', data=train, ax=axes[i])
+    axes[i].set_title(f'{features} vs day')
+    axes[i].set_xlabel('day')
+    axes[i].set_ylabel(features)
+    axes[i].legend(title='rainfall')
+    axes[i].grid(True)
+    axes[i].set_facecolor('lightgrey')
+for j in range(i+1,flen):
+        fig.delaxes(axes[j])
+plt.tight_layout()
+plt.show()
+```
 
 ### Key Observations:
 
@@ -181,7 +233,7 @@ The provided image contains a series of six line graphs and three scatter plots,
 
 ---
 
-![image here ]()
+![image here ](https://github.com/7arb25/Binary-Prediction-with-a-Rainfall-Dataset/blob/d85aae4a9e62ebd91b1aa6dc528d5971c7024325/imgs/Monthly%20rainfall%20count.png)
 
 ### Rainfall Analysis by Month
 
@@ -205,7 +257,7 @@ The data suggests a fairly uniform distribution of rainfall across the months, w
 
 ---
 
-![image here]()
+![image here](https://github.com/7arb25/Binary-Prediction-with-a-Rainfall-Dataset/blob/d85aae4a9e62ebd91b1aa6dc528d5971c7024325/imgs/Boxplots.png)
 
 ### **EDA - Boxplots of Meteorological Features vs. Day**
 
@@ -294,7 +346,7 @@ The boxplots represent the distribution of various meteorological features acros
 
 ---
 
-![image here]()
+![image here](https://github.com/7arb25/Binary-Prediction-with-a-Rainfall-Dataset/blob/d85aae4a9e62ebd91b1aa6dc528d5971c7024325/imgs/Rainfall%20distribution.png)
 
 ### **EDA - Rainfall (0/1) Distribution**
 
@@ -329,7 +381,7 @@ The histogram below represents the distribution of the binary `rainfall` variabl
 
 ---
 
-![table here]()
+![table here](https://github.com/7arb25/Binary-Prediction-with-a-Rainfall-Dataset/blob/d85aae4a9e62ebd91b1aa6dc528d5971c7024325/imgs/Monthly%20features%20mean%20table.jpg)
 
 ### Observations
 
@@ -337,11 +389,43 @@ The histogram below represents the distribution of the binary `rainfall` variabl
 - The highest temperature and dewpoint are recorded in Month 7 (29.508152 and 25.266848, respectively), indicating warmer and more humid conditions.
 - Pressure values vary from 1007.841304 (Month 7) to 1019.794924 (Month 1), reflecting changes in atmospheric conditions.
 
+``` python
+
+train[["month","pressure","temparature","dewpoint","humidity","rainfall"]].groupby('month').agg(
+    pressure=('pressure', 'mean'),
+    temparature=('temparature', 'mean'),
+    dewpoint=('dewpoint', 'mean'),
+    humidity=('humidity', 'mean',),
+    rainfall=('rainfall', 'mean')
+).sort_values(by='rainfall',ascending=False)
+```
+
+
 ---
 
 ### **EDA - Monthly Average Weather Features**
 
+![img](https://github.com/7arb25/Binary-Prediction-with-a-Rainfall-Dataset/blob/d85aae4a9e62ebd91b1aa6dc528d5971c7024325/imgs/Monthly%20average%20weather%20features.png)
+
 This section of the exploratory data analysis (EDA) visualizes the normalized average values of weather features (pressure, temperature, dewpoint, humidity, and rainfall) across each month of the year. The visualization is a bar chart showing how these features vary month by month.
+
+``` python
+scaler=StandardScaler()
+train[["pressure","temparature","dewpoint","humidity","rainfall"]]=scaler.fit_transform(train[["pressure","temparature","dewpoint","humidity","rainfall"]])
+train[["month","pressure","temparature","dewpoint","humidity","rainfall"]].groupby('month').agg(
+    pressure=('pressure', 'mean'),
+    temparature=('temparature', 'mean'),
+    dewpoint=('dewpoint', 'mean'),
+    humidity=('humidity', 'mean',),
+    rainfall=('rainfall', 'mean')
+).sort_values(by='rainfall',ascending=False).plot(kind='bar',figsize=(12, 6))
+plt.title('Monthly Average Weather Features')
+plt.ylabel('Average Value')
+plt.xlabel('Month')
+plt.grid(axis='y')
+plt.show()
+```
+
 
 ### Contents
 
@@ -385,7 +469,7 @@ The bar chart below represents the normalized average values of weather features
 
 ---
 
-![heatmap]()
+![heatmap](https://github.com/7arb25/Binary-Prediction-with-a-Rainfall-Dataset/blob/d85aae4a9e62ebd91b1aa6dc528d5971c7024325/imgs/Correlations%20heatmap.png)
 
 ### **EDA - Correlation Matrix of Weather Features**
 
@@ -441,7 +525,7 @@ The correlation matrix below represents the Pearson correlation coefficients bet
 
 ---
 
-![rainfall per week]()
+![rainfall per week](https://github.com/7arb25/Binary-Prediction-with-a-Rainfall-Dataset/blob/d85aae4a9e62ebd91b1aa6dc528d5971c7024325/imgs/Rainfall%20by%20week.png)
 
 ### **EDA - Rainfall Count by Week of Year**
 
@@ -475,7 +559,7 @@ The line graph below represents the rainfall count by week of year:
 
 ---
 
-![image here]()
+![image here](https://github.com/7arb25/Binary-Prediction-with-a-Rainfall-Dataset/blob/d85aae4a9e62ebd91b1aa6dc528d5971c7024325/imgs/Untitled.png)
 
 ### Interpretation of the Weather Features Graph  
 
@@ -510,13 +594,13 @@ This project focuses on building an XGBoost-based classifier to predict rainfall
 #### **Model Performance ** 
 
 #### Confusion Matrix  
-![Confusion Matrix](xg_cm.png)  
+![Confusion Matrix](https://github.com/7arb25/Binary-Prediction-with-a-Rainfall-Dataset/blob/d85aae4a9e62ebd91b1aa6dc528d5971c7024325/imgs/xg_cm.png)  
 
 #### Feature Importance  
-![Feature Importance](xg_featureimportance.png)  
+![Feature Importance](https://github.com/7arb25/Binary-Prediction-with-a-Rainfall-Dataset/blob/d85aae4a9e62ebd91b1aa6dc528d5971c7024325/imgs/xg_featureimportance.png)  
 
 #### ROC Curve  
-![ROC Curve](xg_roc.png)  
+![ROC Curve](https://github.com/7arb25/Binary-Prediction-with-a-Rainfall-Dataset/blob/d85aae4a9e62ebd91b1aa6dc528d5971c7024325/imgs/xg_roc.png)  
 
 - **AUC Score:** 0.78 (Indicates good predictive performance)  
 - **Most Important Features:**  
@@ -542,13 +626,13 @@ This project focuses on building an XGBoost-based classifier to predict rainfall
 #### **Model Performance **
 
 #### Confusion Matrix  
-![Confusion Matrix](randomforest_heatmap.png)  
+![Confusion Matrix](https://github.com/7arb25/Binary-Prediction-with-a-Rainfall-Dataset/blob/d85aae4a9e62ebd91b1aa6dc528d5971c7024325/imgs/randomforest_heatmap.png)  
 
 #### Feature Importance  
-![Feature Importance](randomfirest_featureimportanxe.png)  
+![Feature Importance](https://github.com/7arb25/Binary-Prediction-with-a-Rainfall-Dataset/blob/d85aae4a9e62ebd91b1aa6dc528d5971c7024325/imgs/randomfirest_featureimportanxe.png)  
 
 #### ROC Curve  
-![ROC Curve](rf_roc.png)  
+![ROC Curve](https://github.com/7arb25/Binary-Prediction-with-a-Rainfall-Dataset/blob/d85aae4a9e62ebd91b1aa6dc528d5971c7024325/imgs/rf_roc.png)  
 
 - **AUC Score:** 0.79 (Indicates strong predictive performance)  
 - **Most Important Features:**  
@@ -567,7 +651,7 @@ This project focuses on building an XGBoost-based classifier to predict rainfall
 - **Comparison with other models**: Evaluating Gradient Boosting, SVM, and Neural Networks.  
 
 ---
-## Data Limitation
+## Model Limitations
 
 While the dataset provides valuable insights for rainfall prediction, it has certain limitations:
 
@@ -606,6 +690,7 @@ Both models demonstrated solid performance, with Random Forest outperforming XGB
 
 
 ---
+
 ## Recommendations
 To further improve rainfall prediction, the following steps are suggested:
 
